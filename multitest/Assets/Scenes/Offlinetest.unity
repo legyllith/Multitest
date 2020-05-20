@@ -203,9 +203,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2008127832}
-  - component: {fileID: 2008127833}
   - component: {fileID: 2008127831}
   - component: {fileID: 2008127830}
+  - component: {fileID: 2008127833}
   m_Layer: 0
   m_Name: RoomManager
   m_TagString: Untagged
