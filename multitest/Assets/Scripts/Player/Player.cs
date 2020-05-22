@@ -37,4 +37,34 @@ public class Player : NetworkBehaviour
     {
         Camera.main.transform.Translate(movement.x, movement.z * Time.deltaTime, movement.y);
     }
+
+    [Command]
+    public void CmdRequestAuthority(NetworkIdentity id)
+    {
+        Debug.Log("ok");
+        id.GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
+        //CmdRequestAuthority(id);
+    }
+
+    /*[Command]
+    public void CmdRequestAuthority(NetworkIdentity id)
+    {
+        //validate logic here 
+        Debug.Log("ok 2");
+        id.AssignClientAuthority(connectionToClient);
+    }*/
+
+
+    /*[Command]
+    public void Cmdbuild(Node node)
+    {
+        //validate logic here 
+        Rpcbuild(node);
+    }
+
+    [ClientRpc]
+    private void Rpcbuild(Node node)
+    {
+         node.myRenderer.material.color = Color.blue;
+    }*/
 }
