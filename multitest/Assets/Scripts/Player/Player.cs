@@ -8,7 +8,23 @@ using System;
 public class Player : NetworkBehaviour
 {
     [SerializeField] private Vector3 movement = new Vector3();
+    [SyncVar] public double Gold = 0;
+    public double startGold = 500;
+    public CanvasPlayer canvasPlayer;
+    public GameObject objectToSpawn;
     [Client]
+    
+
+    public override void OnStartLocalPlayer()
+    {
+        foreach (Node i in FindObjectsOfType<Node>())
+        {
+            i.p = this;
+        }
+        canvasPlayer.gameObject.SetActive(true);
+        CmdSetUp();
+    }
+
     private void Update()
     {
         if(!hasAuthority) { return; }
@@ -41,30 +57,48 @@ public class Player : NetworkBehaviour
     [Command]
     public void CmdRequestAuthority(NetworkIdentity id)
     {
-        Debug.Log("ok");
-        id.GetComponent<NetworkIdentity>().AssignClientAuthority(this.GetComponent<NetworkIdentity>().connectionToClient);
-        //CmdRequestAuthority(id);
+        id.AssignClientAuthority(connectionToClient);
+
     }
 
-    /*[Command]
-    public void CmdRequestAuthority(NetworkIdentity id)
+    [Command]
+    public void Cmdbuild(NetworkIdentity id, Vector3 spawnPoint)
     {
-        //validate logic here 
-        Debug.Log("ok 2");
-        id.AssignClientAuthority(connectionToClient);
-    }*/
-
-
-    /*[Command]
-    public void Cmdbuild(Node node)
-    {
-        //validate logic here 
-        Rpcbuild(node);
+        RpcPay();
+        RpcBuild(id, spawnPoint);
+        id.GetComponent<Node>().color = new Color(UnityEngine.Random.Range(0F, 1F), UnityEngine.Random.Range(0, 1F), UnityEngine.Random.Range(0, 1F));
     }
 
     [ClientRpc]
-    private void Rpcbuild(Node node)
+    public void RpcBuild(NetworkIdentity id, Vector3 spawnPoint)
     {
-         node.myRenderer.material.color = Color.blue;
-    }*/
+        GameObject build = Instantiate(objectToSpawn, spawnPoint, Quaternion.identity);
+        //NetworkServer.Spawn(build);
+    }
+
+    [ClientRpc]
+    public void RpcPay()
+    {
+        Gold -= 100;
+        canvasPlayer.changeGold(Gold);
+    }
+
+    [Command]
+    public void CmdSetUp()
+    {
+        RpcSetUp();
+    }
+
+    [ClientRpc]
+    public void RpcSetUp()
+    {
+        Gold = startGold;
+        canvasPlayer.changeGold(Gold);
+    }
+
+    [Command]
+    public void CmdRemoveAuthority(NetworkIdentity id)
+    {
+        id.RemoveClientAuthority();
+    }
 }

@@ -6,51 +6,58 @@ using Mirror;
 public class Node : NetworkBehaviour
 {
     public Player p;
-    public MeshRenderer myRenderer;
+    [SyncVar] public Color color = Color.white;
+    private bool syncColor = true;
 
-    public override void OnStartAuthority()
+    public void Update()
     {
-        base.OnStartAuthority();
-        myRenderer.material.color = Color.blue;
+        if (syncColor)
+        {
+            GetComponent<MeshRenderer>().material.color = color;
+        }
     }
 
-    public void Start()
+    /*public void Start()
     {
         myRenderer = GetComponent<MeshRenderer>();
-    }
+    }*/
 
+    [Client]
     public void OnMouseEnter()
     {
-        myRenderer.material.color = Color.red ;
-        
+        GetComponent<MeshRenderer>().material.color = Color.red ;
+        syncColor = false;
     }
+
+    [Client]
     public void OnMouseExit()
     {
-        myRenderer.material.color = Color.white;
+        syncColor = true;
 
     }
     public void OnMouseDown()
     {
-        // Cmdbuild();
-        Debug.Log("entre");
-        //this.GetComponent<NetworkIdentity>().AssignClientAuthority(p.GetComponent<NetworkIdentity>().connectionToClient);
-        p.CmdRequestAuthority(GetComponent<NetworkIdentity>());
-
+        p.CmdRequestAuthority(netIdentity);
+        p.Cmdbuild(netIdentity, this.transform.position);
+        //Rpcbuild();
+        //color = Color.blue;
+        //p.CmdRemoveAuthority(netIdentity);
+        p.CmdRemoveAuthority(netIdentity);
     }
 
-    [Command]
+    /*[Command]
     public void Cmdbuild()
     {
         //validate logic here 
         p.CmdRequestAuthority(GetComponent<NetworkIdentity>());
         //GetComponent<NetworkIdentity>().AssignClientAuthority(connectionToClient);
         /*Rpcbuild();
-        GetComponent<NetworkIdentity>().RemoveClientAuthority();*/
+        GetComponent<NetworkIdentity>().RemoveClientAuthority();
     }
 
     [ClientRpc]
     private void Rpcbuild()
     {
         myRenderer.material.color = Color.blue;
-    }
+    }*/
 }
