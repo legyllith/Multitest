@@ -54,51 +54,47 @@ public class Player : NetworkBehaviour
         Camera.main.transform.Translate(movement.x, movement.z * Time.deltaTime, movement.y);
     }
 
-    [Command]
+    [Command]//assigné l authorité pour pouvoir modifé l objet.
     public void CmdRequestAuthority(NetworkIdentity id)
     {
         id.AssignClientAuthority(connectionToClient);
 
     }
 
+    [Command]//retiré l authorité
+    public void CmdRemoveAuthority(NetworkIdentity id)
+    {
+        id.RemoveClientAuthority();
+    }
+
     [Command]
     public void Cmdbuild(NetworkIdentity id, Vector3 spawnPoint)
     {
         RpcPay();
-        RpcBuild(id, spawnPoint);
+        //spawn un objet sur le serveur
+        GameObject build = Instantiate(objectToSpawn, spawnPoint, Quaternion.identity);
+        NetworkServer.Spawn(build);
         id.GetComponent<Node>().color = new Color(UnityEngine.Random.Range(0F, 1F), UnityEngine.Random.Range(0, 1F), UnityEngine.Random.Range(0, 1F));
     }
 
-    [ClientRpc]
-    public void RpcBuild(NetworkIdentity id, Vector3 spawnPoint)
-    {
-        GameObject build = Instantiate(objectToSpawn, spawnPoint, Quaternion.identity);
-        //NetworkServer.Spawn(build);
-    }
-
-    [ClientRpc]
+    [ClientRpc]//ne fait payé que le client et pas tout les client
     public void RpcPay()
     {
         Gold -= 100;
         canvasPlayer.changeGold(Gold);
     }
 
-    [Command]
+    [Command]//envoie au serveur qu'une fonction est joué
     public void CmdSetUp()
     {
         RpcSetUp();
     }
 
-    [ClientRpc]
+    [ClientRpc]//joue sur le client et ne set up que 1 client
     public void RpcSetUp()
     {
         Gold = startGold;
         canvasPlayer.changeGold(Gold);
     }
 
-    [Command]
-    public void CmdRemoveAuthority(NetworkIdentity id)
-    {
-        id.RemoveClientAuthority();
-    }
 }
